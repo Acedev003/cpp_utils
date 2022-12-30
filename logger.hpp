@@ -3,6 +3,8 @@
 #include<chrono>
 #include<string>
 #include<iostream>
+#include<fstream>
+#include<cstdarg>
 
 enum LogLevel  { FATAL = 4, ERROR = 3, WARN = 2, INFO = 1, DEBUG = 0 };
 
@@ -24,42 +26,39 @@ class Logger
                 {
                     get_instance().log_file_path = log_file_path;
                 }
+                get_instance().save_to_file = true;
             }
             
-            if(console_output)
-            {
-                //Logging to console enabled
-            }
 
-            
+            get_instance().console_output = console_output;            
             get_instance().priority_level = priority_level;
             get_instance().initialized    = true;
         }
 
-        template<typename ... Args>
-        static void Fatal(std::string message,Args ... args)
+        static void Fatal(std::string message)
         {
-            log(LogLevel::FATAL,message+"\n",args...);
+            log(LogLevel::FATAL,"[FATAL]\t"+message);
         }
 
-        static void Error()
+        
+        static void Error(std::string message)
         {
-               
+            log(LogLevel::FATAL,"[ERROR]\t"+message);      
         }
 
-        static void Warn()
+        static void Warn(std::string message)
         {
-            
+            log(LogLevel::FATAL,"[WARN] \t"+message);
         }
 
-        static void Info()
+        static void Info(std::string message)
         {
-            
+            log(LogLevel::FATAL,"[INFO] \t"+message);
         }
 
-        static void Debug()
+        static void Debug(std::string message)
         {
-            
+            log(LogLevel::FATAL,"[DEBUG]\t"+message);
         }
 
     private:
@@ -77,19 +76,42 @@ class Logger
             return instance;
         }
         
-        template<typename... Args>
-        static void log(LogLevel log_level,std::string message,Args ... args)
+        static void log(LogLevel log_level,std::string message)
         {
             if(log_level >= get_instance().priority_level && get_instance().initialized)
             {
+                bool time_format_avail = false;
+                typedef std::chrono::system_clock clock;
+
+                auto now          = clock::now();
+                auto seconds      = std::chrono::time_point_cast<std::chrono::seconds>(now);
+                auto fraction     = now - seconds;
+                std::time_t cnow  = clock::to_time_t(now);
+                auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(fraction);
+                char time_str[100];
+                if (std::strftime(time_str, sizeof(time_str), "%H:%M:%S:", std::localtime(&cnow))) 
+                {
+                    time_format_avail = true;   
+                }
+
                 if(get_instance().console_output)
                 {
-                    printf(message.c_str(),args...);   
+                    if(time_format_avail)
+                    {
+                        std::cout << time_str << milliseconds.count()<<" ";
+                    }
+                    std::cout<<message<<std::endl;
                 }
 
                 if(get_instance().save_to_file)
                 {
-
+                    std::ofstream file(log_file_path,std::ios_base::app);
+                    if(time_format_avail)
+                    {
+                        file << time_str << milliseconds.count()<<" ";
+                    }
+                    file<<message<<std::endl;
+                    file.close();
                 }
             }
         }
