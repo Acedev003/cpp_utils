@@ -39,26 +39,25 @@ class Logger
         {
             log(LogLevel::FATAL,"[FATAL]\t"+message);
         }
-
         
         static void Error(std::string message)
         {
-            log(LogLevel::FATAL,"[ERROR]\t"+message);      
+            log(LogLevel::ERROR,"[ERROR]\t"+message);      
         }
 
         static void Warn(std::string message)
         {
-            log(LogLevel::FATAL,"[WARN] \t"+message);
+            log(LogLevel::WARN,"[WARN] \t"+message);
         }
 
         static void Info(std::string message)
         {
-            log(LogLevel::FATAL,"[INFO] \t"+message);
+            log(LogLevel::INFO,"[INFO] \t"+message);
         }
 
         static void Debug(std::string message)
         {
-            log(LogLevel::FATAL,"[DEBUG]\t"+message);
+            log(LogLevel::DEBUG,"[DEBUG]\t"+message);
         }
 
     private:
