@@ -4,7 +4,7 @@
 #include<string>
 #include<iostream>
 #include<fstream>
-#include<cstdarg>
+#include<mutex>
 
 enum LogLevel  { FATAL = 4, ERROR = 3, WARN = 2, INFO = 1, DEBUG = 0 };
 
@@ -64,8 +64,9 @@ class Logger
         static bool initialized;
         static bool console_output;
         static bool save_to_file;
-        static LogLevel priority_level;
+        static LogLevel    priority_level;
         static std::string log_file_path;
+        static std::mutex  logger_mutex; 
 
         Logger(){}
 
@@ -79,6 +80,8 @@ class Logger
         {
             if(log_level >= get_instance().priority_level && get_instance().initialized)
             {
+
+                std::scoped_lock lock(logger_mutex);
                 bool time_format_avail = false;
                 typedef std::chrono::system_clock clock;
 
@@ -87,17 +90,18 @@ class Logger
                 auto fraction     = now - seconds;
                 std::time_t cnow  = clock::to_time_t(now);
                 auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(fraction);
+
                 char time_str[100];
                 if (std::strftime(time_str, sizeof(time_str), "%H:%M:%S:", std::localtime(&cnow))) 
                 {
-                    time_format_avail = true;   
+                    time_format_avail = true;
                 }
 
                 if(get_instance().console_output)
                 {
                     if(time_format_avail)
                     {
-                        std::cout << time_str << milliseconds.count()<<" ";
+                        std::cout<< time_str << milliseconds.count()<<" ";
                     }
                     std::cout<<message<<std::endl;
                 }
@@ -122,3 +126,4 @@ bool Logger::console_output  = true;
 bool Logger::save_to_file    = false;
 LogLevel    Logger::priority_level = LogLevel::INFO;
 std::string Logger::log_file_path  = "LOG.txt";
+std::mutex  Logger::logger_mutex;
