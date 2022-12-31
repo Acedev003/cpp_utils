@@ -81,7 +81,7 @@ class Logger
             if(log_level >= get_instance().priority_level && get_instance().initialized)
             {
 
-                std::scoped_lock lock(logger_mutex);
+                logger_mutex.lock();
                 bool time_format_avail = false;
                 typedef std::chrono::system_clock clock;
 
@@ -116,6 +116,7 @@ class Logger
                     file<<message<<std::endl;
                     file.close();
                 }
+                logger_mutex.unlock();
             }
         }
 
