@@ -28,6 +28,8 @@ class Logger
         static std::string log_file_path;
         static std::mutex  logger_mutex; 
 
+        Logger(){}
+        
         static Logger get_instance();
         static void log(LogLevel log_level,std::string message);
 };
@@ -40,36 +42,34 @@ LogLevel    Logger::priority_level = LogLevel::INFO;
 std::string Logger::log_file_path  = "LOG.txt";
 std::mutex  Logger::logger_mutex;
 
-Logger::Logger(){}
-
 Logger Logger::get_instance()
 {
     static Logger instance;
     return instance;
 }
 
-void Logger::init(LogLevel priority_level = INFO,bool save_to_file = false,bool console_output = true,std::string log_file_path = "")
+void Logger::init(LogLevel priority_level,bool save_to_file,bool console_output,std::string log_file_path)
 {
-            if(console_output == false && save_to_file == false)
-            {
-                //Both console and file outputs disabled. Exiting logger;
-                return;
-            }
-
-            if(save_to_file)
-            {
-                // Logging to file enabled
-                if(log_file_path != "")
-                {
-                    get_instance().log_file_path = log_file_path;
-                }
-                get_instance().save_to_file = true;
-            }
+    if(console_output == false && save_to_file == false)
+    {
+        //Both console and file outputs disabled. Exiting logger;
+        return;
+    }
+    
+    if(save_to_file)
+    {
+        // Logging to file enabled
+        if(log_file_path != "")
+        {
+            get_instance().log_file_path = log_file_path;
+        }
+        get_instance().save_to_file = true;
+    }
             
 
-            get_instance().console_output = console_output;            
-            get_instance().priority_level = priority_level;
-            get_instance().initialized    = true;
+    get_instance().console_output = console_output;            
+    get_instance().priority_level = priority_level;
+    get_instance().initialized    = true;
 }
 
 void Logger::log(LogLevel log_level,std::string message)
