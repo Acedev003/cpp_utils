@@ -34,6 +34,7 @@ class Logger
         static void log(LogLevel log_level,std::string message);
 };
 
+#ifdef ACE_LOGGER_IMPLEMENTATION
 
 bool Logger::initialized     = false;
 bool Logger::console_output  = true;
@@ -139,5 +140,7 @@ void Logger::Debug(std::string message)
 {
     log(LogLevel::DEBUG,"[DEBUG]\t"+message);
 }
+
+#endif
 
 #endif
