@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ACE_LOGGER_HEADER
+#define ACE_LOGGER_HEADER
 
 #include<chrono>
 #include<string>
@@ -128,3 +129,6 @@ bool Logger::save_to_file    = false;
 LogLevel    Logger::priority_level = LogLevel::INFO;
 std::string Logger::log_file_path  = "LOG.txt";
 std::mutex  Logger::logger_mutex;
+
+
+#endif
