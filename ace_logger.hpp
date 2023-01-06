@@ -51,6 +51,8 @@ Logger Logger::get_instance()
 
 void Logger::init(LogLevel priority_level,bool save_to_file,bool console_output,std::string log_file_path)
 {
+    Logger this_logger = get_instance();
+
     if(console_output == false && save_to_file == false)
     {
         //Both console and file outputs disabled. Exiting logger;
@@ -62,20 +64,22 @@ void Logger::init(LogLevel priority_level,bool save_to_file,bool console_output,
         // Logging to file enabled
         if(log_file_path != "")
         {
-            get_instance().log_file_path = log_file_path;
+            this_logger.log_file_path = log_file_path;
         }
-        get_instance().save_to_file = true;
+        this_logger.save_to_file = true;
     }
             
 
-    get_instance().console_output = console_output;            
-    get_instance().priority_level = priority_level;
-    get_instance().initialized    = true;
+    this_logger.console_output = console_output;            
+    this_logger.priority_level = priority_level;
+    this_logger.initialized    = true;
 }
 
 void Logger::log(LogLevel log_level,std::string message)
 {
-    if (log_level >= get_instance().priority_level && get_instance().initialized)
+    Logger this_logger = get_instance();
+
+    if (log_level >= this_logger.priority_level && this_logger.initialized)
     {
         logger_mutex.lock();
         bool time_format_avail = false;
@@ -93,7 +97,7 @@ void Logger::log(LogLevel log_level,std::string message)
             time_format_avail = true;
         }
 
-        if (get_instance().console_output)
+        if (this_logger.console_output)
         {
             if (time_format_avail)
             {
@@ -102,7 +106,7 @@ void Logger::log(LogLevel log_level,std::string message)
             std::cout << message << std::endl;
         }
 
-        if (get_instance().save_to_file)
+        if (this_logger.save_to_file)
         {
             std::ofstream file(log_file_path, std::ios_base::app);
             if (time_format_avail)
