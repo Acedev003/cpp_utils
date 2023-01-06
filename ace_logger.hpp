@@ -14,11 +14,11 @@ class Logger
     public:
         static void init(LogLevel priority_level = INFO,bool save_to_file = false,bool console_output = true,std::string log_file_path = "");
 
-        static void Fatal(std::string message);
-        static void Error(std::string message);
-        static void Warn (std::string message);
-        static void Info (std::string message);
-        static void Debug(std::string message);
+        static void Fatal(const std::string& message);
+        static void Error(const std::string& message);
+        static void Warn (const std::string& message);
+        static void Info (const std::string& message);
+        static void Debug(const std::string& message);
 
     private:
         static bool initialized;
@@ -31,7 +31,7 @@ class Logger
         Logger(){}
         
         static Logger get_instance();
-        static void log(LogLevel log_level,std::string message);
+        static void log(LogLevel log_level,const std::string& message);
 };
 
 #ifdef ACE_LOGGER_IMPLEMENTATION
@@ -51,31 +51,32 @@ Logger Logger::get_instance()
 
 void Logger::init(LogLevel priority_level,bool save_to_file,bool console_output,std::string log_file_path)
 {
-    Logger this_logger = get_instance();
-
-    if(console_output == false && save_to_file == false)
+    if(!initialized)
     {
-        //Both console and file outputs disabled. Exiting logger;
-        return;
-    }
-    
-    if(save_to_file)
-    {
-        // Logging to file enabled
-        if(log_file_path != "")
+        Logger this_logger = get_instance();
+        if (console_output == false && save_to_file == false)
         {
-            this_logger.log_file_path = log_file_path;
+            // Both console and file outputs disabled. Exiting logger;
+            return;
         }
-        this_logger.save_to_file = true;
-    }
-            
 
-    this_logger.console_output = console_output;            
-    this_logger.priority_level = priority_level;
-    this_logger.initialized    = true;
+        if (save_to_file)
+        {
+            // Logging to file enabled
+            if (log_file_path != "")
+            {
+                this_logger.log_file_path = log_file_path;
+            }
+            this_logger.save_to_file = true;
+        }
+
+        this_logger.console_output = console_output;
+        this_logger.priority_level = priority_level;
+        this_logger.initialized = true;
+    }
 }
 
-void Logger::log(LogLevel log_level,std::string message)
+void Logger::log(LogLevel log_level,const std::string& message)
 {
     Logger this_logger = get_instance();
 
@@ -85,10 +86,10 @@ void Logger::log(LogLevel log_level,std::string message)
         bool time_format_avail = false;
         typedef std::chrono::system_clock clock;
 
-        auto now = clock::now();
-        auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
-        auto fraction = now - seconds;
-        std::time_t cnow = clock::to_time_t(now);
+        auto now          = clock::now();
+        auto seconds      = std::chrono::time_point_cast<std::chrono::seconds>(now);
+        auto fraction     = now - seconds;
+        std::time_t cnow  = clock::to_time_t(now);
         auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(fraction);
 
         char time_str[100];
@@ -120,27 +121,27 @@ void Logger::log(LogLevel log_level,std::string message)
     }
 }
 
-void Logger::Fatal(std::string message)
+void Logger::Fatal(const std::string& message)
 {
     log(LogLevel::FATAL,"[FATAL]\t"+message);
 }
 
-void Logger::Error(std::string message)
+void Logger::Error(const std::string& message)
 {
     log(LogLevel::ERROR,"[ERROR]\t"+message);
 }
 
-void Logger::Warn(std::string message)
+void Logger::Warn(const std::string& message)
 {
     log(LogLevel::WARN,"[WARN] \t"+message);
 }
 
-void Logger::Info(std::string message)
+void Logger::Info(const std::string& message)
 {
     log(LogLevel::INFO,"[INFO] \t"+message);
 }
 
-void Logger::Debug(std::string message)
+void Logger::Debug(const std::string& message)
 {
     log(LogLevel::DEBUG,"[DEBUG]\t"+message);
 }
