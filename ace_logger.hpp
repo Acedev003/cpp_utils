@@ -7,12 +7,12 @@
 #include<fstream>
 #include<mutex>
 
-enum LogLevel  { DEBUG, INFO, WARN, ERROR, FATAL };
+enum class LogLevel : std::uint8_t  { DEBUG, INFO, WARN, ERROR, FATAL };
 
 class Logger
 {
     public:
-        static void init(LogLevel priority_level = INFO,bool save_to_file = false,bool console_output = true,std::string log_file_path = "");
+        static void init(LogLevel priority_level = LogLevel::INFO,bool save_to_file = false,bool console_output = true,std::string log_file_path = "");
 
         static void Fatal(const std::string& message);
         static void Error(const std::string& message);
