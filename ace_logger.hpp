@@ -62,8 +62,8 @@ void Logger::log(LogLevel log_level,const std::string& message)
     }
 
     std::string out_text;
-
-    logger_mutex.lock();    
+    
+    logger_mutex.lock();
     using clock = std::chrono::system_clock;
 
     auto now          = clock::now();
@@ -82,8 +82,8 @@ void Logger::log(LogLevel log_level,const std::string& message)
     {
         case LogLevel::FATAL : out_text+=" [FATAL] ";break;
         case LogLevel::ERROR : out_text+=" [ERROR] ";break;
-        case LogLevel::WARN  : out_text+=" [WARN]  ";break;
-        case LogLevel::INFO  : out_text+=" [INFO]  ";break;
+        case LogLevel::WARN  : out_text+=" [WARN ] ";break;
+        case LogLevel::INFO  : out_text+=" [INFO ] ";break;
         case LogLevel::DEBUG : out_text+=" [DEBUG] ";break;  
     }
 
@@ -91,13 +91,13 @@ void Logger::log(LogLevel log_level,const std::string& message)
 
     if (this->console_output)
     {
-        std::cout << out_text << std::endl;
+        std::cout << out_text << "\n";
     }
 
     if (this->save_to_file)
     {
         std::ofstream file(log_file_path, std::ios_base::app);
-        file << out_text << std::endl;
+        file << out_text << "\n";
         file.close();
     }
     logger_mutex.unlock();
