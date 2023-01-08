@@ -64,13 +64,13 @@ void Logger::log(LogLevel log_level,const std::string& message)
     logger_mutex.lock();
     typedef std::chrono::system_clock clock;
 
-    auto now = clock::now();
-    auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
-    auto fraction = now - seconds;
-    std::time_t cnow = clock::to_time_t(now);
+    auto now          = clock::now();
+    auto seconds      = std::chrono::time_point_cast<std::chrono::seconds>(now);
+    auto fraction     = now - seconds;
+    std::time_t cnow  = clock::to_time_t(now);
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(fraction);
 
-    char time_str[100];
+    char time_str[20];
     std::strftime(time_str, sizeof(time_str), "%H:%M:%S:", std::localtime(&cnow));
     
 
