@@ -74,9 +74,9 @@ void Logger::log(LogLevel log_level,const std::string& message)
 
     char time_str[20];
     std::strftime(time_str, sizeof(time_str), "%H:%M:%S:", std::localtime(&cnow));
+    std::snprintf(time_str+9,5,"%03ld",milliseconds.count());
     
     out_text += time_str;
-    out_text += std::string( 3-std::to_string(milliseconds.count()).size(), '0').append( std::to_string(milliseconds.count()));
 
     switch(log_level)
     {
