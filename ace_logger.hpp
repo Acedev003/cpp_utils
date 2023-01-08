@@ -91,13 +91,29 @@ void Logger::log(LogLevel log_level,const std::string& message)
 
     if (this->console_output)
     {
-        std::cout << out_text << "\n";
+        if(log_level == LogLevel::FATAL || log_level == LogLevel::ERROR)
+        {
+            std::clog << out_text << std::endl;
+        }
+        else
+        {
+            out_text += "\n";
+            std::clog << out_text;
+        }
     }
 
     if (this->save_to_file)
     {
         std::ofstream file(log_file_path, std::ios_base::app);
-        file << out_text << "\n";
+        if(log_level == LogLevel::FATAL || log_level == LogLevel::ERROR)
+        {
+            file << out_text << std::endl;
+        }
+        else
+        {
+            out_text += "\n";
+            file << out_text;
+        }
         file.close();
     }
     logger_mutex.unlock();
