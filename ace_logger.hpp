@@ -56,45 +56,47 @@ Logger::Logger(LogLevel priority_level,std::string log_file_path,bool console_ou
 
 void Logger::log(LogLevel log_level,const std::string& message)
 {
-    if (log_level >= this->priority_level)
+    if (log_level < this->priority_level)
     {
-        logger_mutex.lock();
-        bool time_format_avail = false;
-        typedef std::chrono::system_clock clock;
-
-        auto now          = clock::now();
-        auto seconds      = std::chrono::time_point_cast<std::chrono::seconds>(now);
-        auto fraction     = now - seconds;
-        std::time_t cnow  = clock::to_time_t(now);
-        auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(fraction);
-
-        char time_str[100];
-        if (std::strftime(time_str, sizeof(time_str), "%H:%M:%S:", std::localtime(&cnow)))
-        {
-            time_format_avail = true;
-        }
-
-        if (this->console_output)
-        {
-            if (time_format_avail)
-            {
-                std::cout << time_str << milliseconds.count() << " ";
-            }
-            std::cout << message << std::endl;
-        }
-
-        if (this->save_to_file)
-        {
-            std::ofstream file(log_file_path, std::ios_base::app);
-            if (time_format_avail)
-            {
-                file << time_str << milliseconds.count() << " ";
-            }
-            file << message << std::endl;
-            file.close();
-        }
-        logger_mutex.unlock();
+        return;
     }
+
+    logger_mutex.lock();
+    bool time_format_avail = false;
+    typedef std::chrono::system_clock clock;
+
+    auto now = clock::now();
+    auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
+    auto fraction = now - seconds;
+    std::time_t cnow = clock::to_time_t(now);
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(fraction);
+
+    char time_str[100];
+    if (std::strftime(time_str, sizeof(time_str), "%H:%M:%S:", std::localtime(&cnow)))
+    {
+        time_format_avail = true;
+    }
+
+    if (this->console_output)
+    {
+        if (time_format_avail)
+        {
+            std::cout << time_str << milliseconds.count() << " ";
+        }
+        std::cout << message << std::endl;
+    }
+
+    if (this->save_to_file)
+    {
+        std::ofstream file(log_file_path, std::ios_base::app);
+        if (time_format_avail)
+        {
+            file << time_str << milliseconds.count() << " ";
+        }
+        file << message << std::endl;
+        file.close();
+    }
+    logger_mutex.unlock();
 }
 
 void Logger::Fatal(const std::string& message)
