@@ -62,7 +62,6 @@ void Logger::log(LogLevel log_level,const std::string& message)
     }
 
     logger_mutex.lock();
-    bool time_format_avail = false;
     typedef std::chrono::system_clock clock;
 
     auto now = clock::now();
@@ -72,27 +71,19 @@ void Logger::log(LogLevel log_level,const std::string& message)
     auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(fraction);
 
     char time_str[100];
-    if (std::strftime(time_str, sizeof(time_str), "%H:%M:%S:", std::localtime(&cnow)))
-    {
-        time_format_avail = true;
-    }
+    std::strftime(time_str, sizeof(time_str), "%H:%M:%S:", std::localtime(&cnow));
+    
 
     if (this->console_output)
     {
-        if (time_format_avail)
-        {
-            std::cout << time_str << milliseconds.count() << " ";
-        }
+        std::cout << time_str << milliseconds.count() << " ";
         std::cout << message << std::endl;
     }
 
     if (this->save_to_file)
     {
         std::ofstream file(log_file_path, std::ios_base::app);
-        if (time_format_avail)
-        {
-            file << time_str << milliseconds.count() << " ";
-        }
+        file << time_str << milliseconds.count() << " ";
         file << message << std::endl;
         file.close();
     }
