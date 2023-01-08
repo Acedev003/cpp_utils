@@ -61,8 +61,10 @@ void Logger::log(LogLevel log_level,const std::string& message)
         return;
     }
 
-    logger_mutex.lock();
-    typedef std::chrono::system_clock clock;
+    std::string out_text;
+
+    logger_mutex.lock();    
+    using clock = std::chrono::system_clock;
 
     auto now          = clock::now();
     auto seconds      = std::chrono::time_point_cast<std::chrono::seconds>(now);
@@ -73,18 +75,29 @@ void Logger::log(LogLevel log_level,const std::string& message)
     char time_str[20];
     std::strftime(time_str, sizeof(time_str), "%H:%M:%S:", std::localtime(&cnow));
     
+    out_text += time_str;
+    out_text += std::string( 3-std::to_string(milliseconds.count()).size(), '0').append( std::to_string(milliseconds.count()));
+
+    switch(log_level)
+    {
+        case LogLevel::FATAL : out_text+=" [FATAL] ";break;
+        case LogLevel::ERROR : out_text+=" [ERROR] ";break;
+        case LogLevel::WARN  : out_text+=" [WARN]  ";break;
+        case LogLevel::INFO  : out_text+=" [INFO]  ";break;
+        case LogLevel::DEBUG : out_text+=" [DEBUG] ";break;  
+    }
+
+    out_text += message;
 
     if (this->console_output)
     {
-        std::cout << time_str << milliseconds.count() << " ";
-        std::cout << message << std::endl;
+        std::cout << out_text << std::endl;
     }
 
     if (this->save_to_file)
     {
         std::ofstream file(log_file_path, std::ios_base::app);
-        file << time_str << milliseconds.count() << " ";
-        file << message << std::endl;
+        file << out_text << std::endl;
         file.close();
     }
     logger_mutex.unlock();
@@ -92,27 +105,27 @@ void Logger::log(LogLevel log_level,const std::string& message)
 
 void Logger::Fatal(const std::string& message)
 {
-    log(LogLevel::FATAL,"[FATAL]\t"+message);
+    log(LogLevel::FATAL,message);
 }
 
 void Logger::Error(const std::string& message)
 {
-    log(LogLevel::ERROR,"[ERROR]\t"+message);
+    log(LogLevel::ERROR,message);
 }
 
 void Logger::Warn(const std::string& message)
 {
-    log(LogLevel::WARN,"[WARN] \t"+message);
+    log(LogLevel::WARN,message);
 }
 
 void Logger::Info(const std::string& message)
 {
-    log(LogLevel::INFO,"[INFO] \t"+message);
+    log(LogLevel::INFO,message);
 }
 
 void Logger::Debug(const std::string& message)
 {
-    log(LogLevel::DEBUG,"[DEBUG]\t"+message);
+    log(LogLevel::DEBUG,message);
 }
 
 #endif
