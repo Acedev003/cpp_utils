@@ -6,6 +6,7 @@
 #include<iostream>
 #include<fstream>
 #include<mutex>
+#include<exception>
 
 enum class LogLevel : std::uint8_t  { DEBUG, INFO, WARN, ERROR, FATAL };
 
@@ -21,12 +22,11 @@ class Logger
         void Debug(const std::string& message);
 
     private:
-        bool initialized    = false;
-        bool console_output = true;
-        bool save_to_file   = false;
-        LogLevel    priority_level = LogLevel::INFO;
-        std::string log_file_path  = "LOG.txt";
-        std::mutex  logger_mutex; 
+        bool save_to_file;
+        bool console_output;
+        std::mutex logger_mutex; 
+        LogLevel priority_level;
+        std::string log_file_path;
 
         void log(LogLevel log_level,const std::string& message);
 };
@@ -35,33 +35,28 @@ class Logger
 
 Logger::Logger(LogLevel priority_level,std::string log_file_path,bool console_output)
 {
-    if(!initialized)
+    if (log_file_path.empty())
     {
-        if (console_output == false && save_to_file == false)
+        if(!console_output)
         {
-            // Both console and file outputs disabled. Exiting logger;
-            return;
+            throw std::invalid_argument("Console output disabled and Log file path not specified");
         }
-
-        if (save_to_file)
-        {
-            // Logging to file enabled
-            if (log_file_path != "")
-            {
-                this->log_file_path = log_file_path;
-            }
-            this->save_to_file = true;
-        }
-
-        this->console_output = console_output;
-        this->priority_level = priority_level;
-        this->initialized = true;
+        
+        this->save_to_file  = false;
     }
+    else
+    {
+        this->log_file_path = log_file_path;
+        this->save_to_file  = true;
+    }
+
+    this->console_output = console_output;
+    this->priority_level = priority_level;
 }
 
 void Logger::log(LogLevel log_level,const std::string& message)
 {
-    if (log_level >= this->priority_level && this->initialized)
+    if (log_level >= this->priority_level)
     {
         logger_mutex.lock();
         bool time_format_avail = false;
