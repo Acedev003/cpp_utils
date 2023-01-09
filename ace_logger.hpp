@@ -63,7 +63,6 @@ void Logger::log(LogLevel log_level,const std::string& message)
 
     std::string out_text;
     
-    logger_mutex.lock();
     using clock = std::chrono::system_clock;
 
     auto now          = clock::now();
@@ -91,6 +90,7 @@ void Logger::log(LogLevel log_level,const std::string& message)
 
     if (this->console_output)
     {
+        logger_mutex.lock();
         if(log_level == LogLevel::FATAL || log_level == LogLevel::ERROR)
         {
             std::clog << out_text << std::endl;
@@ -100,10 +100,12 @@ void Logger::log(LogLevel log_level,const std::string& message)
             out_text += "\n";
             std::clog << out_text;
         }
+        logger_mutex.unlock();
     }
 
     if (this->save_to_file)
     {
+        logger_mutex.lock();
         std::ofstream file(log_file_path, std::ios_base::app);
         if(log_level == LogLevel::FATAL || log_level == LogLevel::ERROR)
         {
@@ -115,8 +117,8 @@ void Logger::log(LogLevel log_level,const std::string& message)
             file << out_text;
         }
         file.close();
+        logger_mutex.unlock();
     }
-    logger_mutex.unlock();
 }
 
 void Logger::Fatal(const std::string& message)
