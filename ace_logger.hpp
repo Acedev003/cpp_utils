@@ -26,7 +26,7 @@ class Logger
         bool console_output;
         std::mutex logger_mutex; 
         LogLevel priority_level;
-        std::string log_file_path;
+        std::ofstream file;
 
         void log(LogLevel log_level,const std::string& message);
 };
@@ -46,8 +46,15 @@ Logger::Logger(LogLevel priority_level,std::string log_file_path,bool console_ou
     }
     else
     {
-        this->log_file_path = log_file_path;
-        this->save_to_file  = true;
+        this->file.open(log_file_path, std::ios_base::app);
+        if(!this->file)
+        {
+            throw std::runtime_error("Failed to open file at "+log_file_path);
+        }
+        else
+        {
+            this->save_to_file  = true;
+        }
     }
 
     this->console_output = console_output;
@@ -106,7 +113,6 @@ void Logger::log(LogLevel log_level,const std::string& message)
     if (this->save_to_file)
     {
         logger_mutex.lock();
-        std::ofstream file(log_file_path, std::ios_base::app);
         if(log_level == LogLevel::FATAL || log_level == LogLevel::ERROR)
         {
             file << out_text << std::endl;
@@ -116,7 +122,6 @@ void Logger::log(LogLevel log_level,const std::string& message)
             out_text += "\n";
             file << out_text;
         }
-        file.close();
         logger_mutex.unlock();
     }
 }
