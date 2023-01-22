@@ -1,0 +1,9 @@
+#ifndef ACE_ALGOS_HEADER
+#define ACE_ALGOS_HEADER
+
+
+#ifdef ACE_ALGOS_IMPLEMENTATION
+
+
+#endif
+#endif
